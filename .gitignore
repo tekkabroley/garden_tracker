@@ -130,3 +130,12 @@ dmypy.json
 
 # temp files
 .idea
+
+# google api secrets
+client_secret.json
+
+# backup files
+*.bak
+
+# environment variables
+bash_env.sh
