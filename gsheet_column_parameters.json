@@ -1,0 +1,7 @@
+{
+  "Inventory": {
+    "columns": ["A", "B", "J", "K", "L", "M", "N", "O", "Q", "R", "S", "T", "U"],
+    "is_column_name_included": true,
+    "start_row": 4
+  }
+}
