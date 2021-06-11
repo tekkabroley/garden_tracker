@@ -9,7 +9,7 @@ import json
 import os
 
 from gsheets_extraction_tools import map_raw_data_to_columns, map_columnar_data_to_records, build_gsheets_ranges
-from validation import validate_num_rows_is_equal
+
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
