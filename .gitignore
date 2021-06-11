@@ -133,9 +133,15 @@ dmypy.json
 
 # google api secrets
 client_secret.json
+credentials.json
+token.json
 
 # backup files
 *.bak
 
 # environment variables
-bash_env.sh
+.bash_env
+
+# test scripts
+quickstart.py
+gstest.py
