@@ -1,5 +1,5 @@
 
-
+# DEPRECATE
 def validate_num_rows_is_equal(columnar_dataset):
     """
     Check if all columns in columnar_dataset have the same number of rows
