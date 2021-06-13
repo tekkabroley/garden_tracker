@@ -132,7 +132,6 @@ dmypy.json
 .idea
 
 # google api secrets
-client_secret.json
 credentials.json
 token.json
 
@@ -145,3 +144,4 @@ token.json
 # test scripts
 quickstart.py
 gstest.py
+cli_test.py
