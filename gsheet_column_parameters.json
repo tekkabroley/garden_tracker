@@ -1,6 +1,6 @@
 {
   "Inventory": {
-    "columns": ["B", "K", "L", "O", "U", "V", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI"],
+    "columns": ["B", "K", "L", "O", "U", "V", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "BO"],
     "is_column_name_included": true,
     "start_row": 4
   },
@@ -10,7 +10,7 @@
     "start_row": 5
   },
   "Plants": {
-    "columns": ["A", "AC", "AK", "AM", "BA"],
+    "columns": ["A", "AC", "AH", "AI", "AM", "BA"],
     "is_column_name_included": true,
     "start_row": 2
   }
