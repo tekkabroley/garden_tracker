@@ -29,7 +29,7 @@ def map_raw_data_to_columns(value_ranges, is_column_header_included=None):
         for column in columns:
             cnt += 1
             if is_column_header_included is True:
-                column_header = column[0]
+                column_header = column[0].strip()
                 column_values = column[1:]
             else:
                 column_header = f"column {cnt}"  # replace this with the appropriate column letter from the range
@@ -48,14 +48,15 @@ def map_columnar_data_to_records(columnar_dataset):
     for column_name in columnar_dataset:
         column_data = columnar_dataset[column_name]
         num_rows = len(column_data)
+        column_name_ = column_name.strip()
         if len(records) == 0:
             for i in range(num_rows):
                 value = column_data[i]
-                record = {column_name: value}
+                record = {column_name_: value}
                 records.append(record)
         else:
             for i in range(num_rows):
                 value = column_data[i]
                 record = records[i]
-                record.update({column_name: value})
+                record.update({column_name_: value})
     return records
