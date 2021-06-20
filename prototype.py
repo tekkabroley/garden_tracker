@@ -8,18 +8,68 @@ from google.oauth2.credentials import Credentials
 import json
 import os
 import datetime
+import re
 
 from gsheets_extraction_tools import map_raw_data_to_columns, map_columnar_data_to_records, build_gsheets_ranges
 
+import logging
+
+today = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
+logging.basicConfig(filename=f'{today}.log', level=logging.DEBUG)
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 
 def main():
-    # SCRIPT ARGUMENTS
-    target_location = "West Bed South"  # expected input from Locations tab and name column
-    target_date = "2021-08-01"  # date expected format YYYY-mm-dd
+    # USER PROMPT
+    # input for target location
+    user_location_prompt = """
+    1. Around Greenhouse
+    2. Back Bed Left
+    3. Back Bed Right
+    4. Front Bed Right
+    5. Ground Level Bed
+    6. Trellis Beds
+    7. West Bed Middle
+    8. West Bed North
+    9. West Bed South
+    
+    Please enter the number or name of target location:
+    """
+
+    # input for target date
+    target_location_ = input(user_location_prompt).strip()
+    target_location = None
+    if re.match('^[0-9]{1}', target_location_) is not None:
+        location_code = target_location_[0]
+        if location_code == '1':
+            target_location = "Around Greenhouse"
+        elif location_code == '2':
+            target_location = "Back Bed Left"
+        elif location_code == '3':
+            target_location = "Back Bed Right"
+        elif location_code == '4':
+            target_location = "Front Bed Right"
+        elif location_code == '5':
+            target_location = "Ground Level Bed"
+        elif location_code == '6':
+            target_location = "Trellis Beds"
+        elif location_code == '7':
+            target_location = "West Bed Middle"
+        elif location_code == '8':
+            target_location = "West Bed North"
+        elif location_code == '9':
+            target_location = "West Bed South"
+        else:
+            raise ValueError(f"Expected numeric value associated to location prompt but found: {target_location_}")
+    else:
+        target_location = target_location_
+
+    user_date_prompt = "Please specify target date in format YYYY-mm-dd or press ENTER to use today's date: "
+    target_date = input(user_date_prompt).strip()
+    if target_date == '':
+        target_date = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
 
     # DATA EXTRACTION START
     creds = None
@@ -42,20 +92,20 @@ def main():
 
     service = build('sheets', 'v4', credentials=creds)
 
-    # target gsheets sheet id
-    spreadsheet_id = os.environ["sheet_id"]
-
     # Call the Sheets API
     sheet = service.spreadsheets()
 
     # get sheet column parameters
-    sheet_column_parameters_path = "gsheet_column_parameters.json"
-    with open(sheet_column_parameters_path, 'r') as column_params:
-        sheet_column_parameters = json.load(column_params)
+    sheet_parameters_path = "gsheet_column_parameters.json"
+    with open(sheet_parameters_path, 'r') as column_params:
+        sheet_parameters = json.load(column_params)
+
+    # target gsheets sheet id
+    spreadsheet_id = sheet_parameters["sheet_id"]
 
     # EXTRACT Inventory
     # fetch Inventory data
-    inventory_config = sheet_column_parameters["Inventory"]
+    inventory_config = sheet_parameters["Inventory"]
     inventory_columns = inventory_config["columns"]
     inventory_is_column_name_included = inventory_config["is_column_name_included"]
     inventory_start_row = inventory_config["start_row"]
@@ -75,14 +125,14 @@ def main():
     # map inventory columnar data to records
     inventory_records_all = map_columnar_data_to_records(inventory_columnar_data)
     inventory_records = [record for record in inventory_records_all if record.get("Archived", '') == '']
-    #print(f"returned {len(inventory_records)} records from Inventory")
-    #print(f"Inventory columns: {inventory_records[0].keys()}")
+    #print(f"returned {len(inventory_records)} records from Inventory")  # DEBUG
+    #print(f"Inventory columns: {inventory_records[0].keys()}")  # DEBUGå
 
     # specific inventory dims sliced by plant name
     inventory_attribute_map = {}
     for record in inventory_records:
-        plant_name = record["Marketing Name"]
-        plant_sun_constraint = record["Sun"]
+        plant_name = record["Marketing Name"].strip()
+        plant_sun_constraint = record["Sun"].strip()
         # or would it be better to simply pass on inventory which isn't defined for these areas?
         try:
             required_area = float(record["Plant Spacing"]) ** 2
@@ -104,7 +154,7 @@ def main():
 
     # EXTRACT Locations
     # fetch Locations data
-    locations_config = sheet_column_parameters["Locations"]
+    locations_config = sheet_parameters["Locations"]
     locations_columns = locations_config["columns"]
     location_is_column_name_included = locations_config["is_column_name_included"]
     locations_start_row = locations_config["start_row"]
@@ -123,8 +173,8 @@ def main():
 
     # map locations columnar data to records
     locations_records = map_columnar_data_to_records(locations_columnar_data)[:-1]  # temp workaround for data cleaning
-    #print(f"returned {len(locations_records)} records from Locations")
-    #print(f"Locations columns: {locations_records[0].keys()}")
+    #print(f"returned {len(locations_records)} records from Locations")  # DEBUG
+    #print(f"Locations columns: {locations_records[0].keys()}")  # DEBUG
 
     # specific location dims sliced by plant name
     location_attribute_map = {}
@@ -142,10 +192,12 @@ def main():
             "total_area": total_area,
             "sun": location_sun_constraint
         }
+    #for attrib in location_attribute_map:
+    #    print("loc", attrib, location_attribute_map[attrib]["sun"])
 
     # EXTRACT Plants
     # fetch Plants data
-    plants_config = sheet_column_parameters["Plants"]
+    plants_config = sheet_parameters["Plants"]
     plants_columns = plants_config["columns"]
     plants_is_column_name_included = plants_config["is_column_name_included"]
     plants_start_row = plants_config["start_row"]
@@ -163,8 +215,8 @@ def main():
     
     plants_records = map_columnar_data_to_records(plants_columnar_data)
     active_runs_records = [record for record in plants_records if record["Archive?"] == '']
-    #print(f"returned {len(active_runs_records)} records from Plants")
-    #print(f"Runs columns: {active_runs_records[0].keys()}")
+    #print(f"returned {len(active_runs_records)} records from Plants")  # DEBUG
+    #print(f"Runs columns: {active_runs_records[0].keys()}")  # DEBUG
 
 
     # FILTER INVENTORY ON LOCATION SUN CONSTRAINT
@@ -172,23 +224,62 @@ def main():
     if target_locaiton_attributes is None:
         raise KeyError(f"{target_location} not found in location_attribute_map")
 
-    location_sun_constraint = target_locaiton_attributes.get("sun")
-    location_total_area = target_locaiton_attributes.get("total_area")
-
+    location_sun_constraint = target_locaiton_attributes.get("sun").lower()
     if location_sun_constraint is None:
         raise ValueError("expected locaiton_sun_constraint but found None")
 
-    if location_total_area is None:
-        raise ValueError("expected location_total_area but found None")
+    #sun_constraint_match = [plant for plant in inventory_records
+    #                        if plant["Sun"].lower() == location_sun_constraint]
+    sun_constraint_match = []
+    for record in inventory_records:
+        sun_contraint = record["Sun"].lower()
+        if sun_contraint == location_sun_constraint:
+            sun_constraint_match.append(record)
 
-    sun_constraint_match = [plant for plant in inventory_records
-                            if plant["Sun"].lower() == location_sun_constraint]
+    #print("sun_constraint_match", sun_constraint_match)
+    # why is the total area fetched here? appears to be dead code
+    #location_total_area = target_locaiton_attributes.get("total_area")
+    #if location_total_area is None:
+    #    raise ValueError("expected location_total_area but found None")
+
 
     # FILTER INVENTORY ON SEASONALITY
     # convert target_date to 3 letter month code
     target_month = datetime.datetime.strftime(datetime.datetime.strptime(target_date, '%Y-%m-%d'), "%b")
-    seasonality_constraint_match = [plant for plant in sun_constraint_match if plant[target_month].strip() == 'x']
+    seasonality_constraint_match = []
+    for record in sun_constraint_match:
+        is_in_season = record.get(target_month, '').strip() == 'x'
+        if is_in_season:
+            seasonality_constraint_match.append(record)
 
+
+    #seasonality_constraint_match = [plant for plant in sun_constraint_match if plant[target_month].strip() == 'x']
+    #seasonality_constraint_match = [record["Marketing Name"] for record in sun_constraint_match
+    #                                if record[target_month].strip() == 'x']
+    #print(f"num records after seasonality filter: {len(seasonality_constraint_match)}")
+
+    filtered_inventory_attribute_map = {}
+    for record in seasonality_constraint_match:
+        plant_name = record["Marketing Name"]
+        plant_sun_constraint = record["Sun"]
+        # or would it be better to simply pass on inventory which isn't defined for these areas?
+        try:
+            required_area = float(record["Plant Spacing"]) ** 2
+        except ValueError:
+            required_area = None
+
+        try:
+            max_single_planting = int(record["Max Single Planting"])
+        except ValueError:
+            max_single_planting = None
+
+        required_duration = int(record["DTM"]) + int(record["MD"])
+        filtered_inventory_attribute_map[plant_name] = {
+            "required_area": required_area,
+            "max_single_planting": max_single_planting,
+            "Sun": plant_sun_constraint,
+            "required_duration": required_duration
+        }
 
     # CALC FOR AVAILABLE AREA IN LOCATION
     # calculate the total area used in a location per date over a range
@@ -200,7 +291,8 @@ def main():
         plant_name = run["Marketing Name"]
         plant_inventory_attributes = inventory_attribute_map.get(plant_name)
         if plant_inventory_attributes is None:
-            print(f"unable to find inventory dimensions for {plant_name}")
+            #print(f"unable to find inventory dimensions for {plant_name}")
+            logging.debug(f"unable to find inventory dimensions for {plant_name}")
             continue
 
         required_duration = plant_inventory_attributes["required_duration"]
@@ -210,7 +302,8 @@ def main():
         location_name = run["OD Location"]
         location_attributes = location_attribute_map.get(location_name)
         if location_attributes is None:
-            print(f"unable to find location dimensions for {location_name}")
+            #print(f"unable to find location dimensions for {location_name}")
+            logging.debug(f"unable to find location dimensions for {location_name}")
             continue
         location_total_area = location_attributes["total_area"]
 
@@ -254,14 +347,12 @@ def main():
         available_area = location_attribute_map[target_location]["total_area"] - used_area
         available_area_by_date[date] = available_area
 
-    #print(f"available area for target_date: {available_area_by_date[target_date]}")
-
     # for each plant in inventory check if required area is available during expected duraiton
     viable_plants = []
     target_date_available_area = available_area_by_date[target_date]
-    for plant_name in inventory_attribute_map:
-        required_area = inventory_attribute_map[plant_name]["required_area"]
-        required_duration = inventory_attribute_map[plant_name]["required_duration"]
+    for plant_name in filtered_inventory_attribute_map:
+        required_area = filtered_inventory_attribute_map[plant_name]["required_area"]
+        required_duration = filtered_inventory_attribute_map[plant_name]["required_duration"]
         if required_area is None or required_duration is None:
             continue
         plant_duration_end_date = datetime.datetime.strftime(datetime.datetime.strptime(target_date, '%Y-%m-%d') +
@@ -288,21 +379,14 @@ def main():
 
 
     # USER OUTPUT
-    print('\n', f"{target_location} available area on {target_date}:", target_date_available_area)
-    print("Recommended Plant Name, Quantity")
-    for plant_name, qty in viable_plants:
-        print(plant_name, qty)
-
-    # output validation
-    '''print('\n\n')
-    print(f"{target_location} available on {target_date}:", target_date_available_area)
-    for plant_name, qty in viable_plants:
-        required_area = inventory_attribute_map[plant_name]["required_area"]
-        #required_duraiton = inventory_attribute_map[plant_name]["required_duration"]
-        max_single_planting = inventory_attribute_map[plant_name]["max_single_planting"]
-        recommended_area_used = qty * required_area
-        print("plant name:", plant_name, '|', "quantity:", qty, '|', "max single planting:", max_single_planting, '|', "recommended area used:", recommended_area_used)
-    '''
+    print('\n')
+    print(f"{target_location} available area on {target_date}: {round(target_date_available_area, 2)} sqft")
+    if not viable_plants:
+        print("No recommendation")
+    else:
+        print("Recommended Plant Name, Quantity")
+        for plant_name, qty in viable_plants:
+            print(plant_name, qty)
 
 
 if __name__ == "__main__":
