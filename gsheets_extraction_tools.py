@@ -1,35 +1,41 @@
 
 
-def map_raw_data_to_columns(sheet, start_row, is_column_name_included, columns, end_row=None):
+def build_gsheets_ranges(sheet_name, start_row, columns):
     """
-    :param sheet: google sheets sheet object
-    :param start_row: the start row in the sheet
-    :param is_column_name_included: Boolean which is True if column name included in dataset
-    :param columns: list of sheet column letters
-    :param end_row: terminal row on sheet for sourcing data. If end_row is None then all rows below start_row
-        will be extracted.
-    :return: dict object mapping column names to list of values
+    Build gsheets ranges from start_row and columns.
+    :param sheet_name:
+    :param start_row:
+    :param columns:
+    :return: list of ranges
     """
-    column_values = {}
+    output = []
     for column in columns:
-        values = sheet[column]
-        start_index = start_row - 1  # convert sheet row to 0 based index
+        range_ = f"{sheet_name}!{column}{start_row}:{column}"
+        output.append(range_)
+    return output
 
-        if is_column_name_included:
-            column_name = values[start_index]
-            if end_row is not None:
-                end_index = end_row - 1  # convert sheet row to 0 based index
-                column_values[column_name] = values[start_index + 1: end_index]
-            else:
-                column_values[column_name] = values[start_index + 1:]
 
-        else:
-            if end_row is not None:
-                end_index = end_row - 1  # convert sheet row to 0 based index
-                column_values[column] = values[start_index: end_index]
+def map_raw_data_to_columns(value_ranges, is_column_header_included=None):
+    """
+    Transform raw to columnar data
+    :param value_ranges:
+    :param is_column_header_included:
+    :return: dict mapping column_name -> list of values
+    """
+    output = {}  # {column name: values (list of primitives)}
+    for vr in value_ranges:
+        columns = vr["values"]
+        cnt = 0
+        for column in columns:
+            cnt += 1
+            if is_column_header_included is True:
+                column_header = column[0].strip()
+                column_values = column[1:]
             else:
-                column_values[column] = values[start_index:]
-    return column_values
+                column_header = f"column {cnt}"  # replace this with the appropriate column letter from the range
+                column_values = column
+            output[column_header] = column_values
+    return output
 
 
 def map_columnar_data_to_records(columnar_dataset):
@@ -42,14 +48,15 @@ def map_columnar_data_to_records(columnar_dataset):
     for column_name in columnar_dataset:
         column_data = columnar_dataset[column_name]
         num_rows = len(column_data)
+        column_name_ = column_name.strip()
         if len(records) == 0:
             for i in range(num_rows):
-                value = column_data[i]
-                record = {column_name: value}
+                value = column_data[i].strip()
+                record = {column_name_: value}
                 records.append(record)
         else:
             for i in range(num_rows):
-                value = column_data[i]
+                value = column_data[i].strip()
                 record = records[i]
-                record.update({column_name: value})
+                record.update({column_name_: value})
     return records
