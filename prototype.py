@@ -40,7 +40,6 @@ def main():
 
     # input for target date
     target_location_ = input(user_location_prompt).strip()
-    target_location = None
     if re.match('^[0-9]{1}', target_location_) is not None:
         location_code = target_location_[0]
         if location_code == '1':
