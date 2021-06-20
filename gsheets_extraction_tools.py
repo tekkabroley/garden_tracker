@@ -51,12 +51,12 @@ def map_columnar_data_to_records(columnar_dataset):
         column_name_ = column_name.strip()
         if len(records) == 0:
             for i in range(num_rows):
-                value = column_data[i]
+                value = column_data[i].strip()
                 record = {column_name_: value}
                 records.append(record)
         else:
             for i in range(num_rows):
-                value = column_data[i]
+                value = column_data[i].strip()
                 record = records[i]
                 record.update({column_name_: value})
     return records
