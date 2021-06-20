@@ -14,7 +14,7 @@ from gsheets_extraction_tools import map_raw_data_to_columns, map_columnar_data_
 
 import logging
 
-today = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
+today = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
 logging.basicConfig(filename=f'{today}.log', level=logging.DEBUG)
 
 # If modifying these scopes, delete the file token.json.
@@ -69,7 +69,7 @@ def main():
     user_date_prompt = "Please specify target date in format YYYY-mm-dd or press ENTER to use today's date: "
     target_date = input(user_date_prompt).strip()
     if target_date == '':
-        target_date = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
+        target_date = today
 
     # DATA EXTRACTION START
     creds = None
