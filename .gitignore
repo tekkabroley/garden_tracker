@@ -145,3 +145,6 @@ token.json
 quickstart.py
 gstest.py
 cli_test.py
+
+# csv files from data extraction
+extract/csv
