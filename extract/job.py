@@ -6,9 +6,11 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
 import json
-import datetime
-from pathlib import Path
-import csv
+
+# add support for storing raw data in csv
+# import datetime
+# from pathlib import Path
+# import csv
 
 from gsheets_extraction_tools import build_gsheets_ranges, map_raw_data_to_columns, map_columnar_data_to_records
 
@@ -19,9 +21,9 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 def main():
     # CSV STORAGE PARAMETERS
-    today = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
-    csv_storage_dir = f"csv/{today}"
-    Path(f"csv/{today}").mkdir(parents=True, exist_ok=True)
+    # today = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
+    #  csv_storage_dir = f"csv/{today}"
+    # Path(f"csv/{today}").mkdir(parents=True, exist_ok=True)
 
     # ACCESS GOOGLE SHEETS
     creds = None
@@ -75,19 +77,20 @@ def main():
                                                       is_column_header_included=inventory_is_column_name_included)
 
     # map inventory columnar data to records
-    inventory_records_all = map_columnar_data_to_records(inventory_columnar_data)
+    inventory_records = map_columnar_data_to_records(inventory_columnar_data)
 
     # define path for storing inventory csv file from exract
-    inventory_file_name = "inventory.csv"
-    inventory_file_path = csv_storage_dir + '/' + inventory_file_name
+    # inventory_file_name = "inventory.csv"
+    # inventory_file_path = csv_storage_dir + '/' + inventory_file_name
 
     # get list of inventory column headers
-    inventory_column_headers = list(inventory_columnar_data.keys())
+    # inventory_column_headers = list(inventory_columnar_data.keys())
+    # print("inventory_column_headers", inventory_column_headers)
 
     # Write Inventory to CSV
-    with open(inventory_file_path, 'w') as inventory_outfile:
+    '''with open(inventory_file_path, 'w') as inventory_outfile:
         csvwriter = csv.DictWriter(inventory_outfile, fieldnames=inventory_column_headers)
-        csvwriter.writerows(inventory_records_all)
+        csvwriter.writerows(inventory_records_all)'''
 
     # EXTRACT LOCAITONS
     # fetch Locations data
@@ -114,16 +117,17 @@ def main():
     locations_records = [record for record in locations_records_ if len(record) > 1]
 
     # define path for storing locations csv file from extract
-    locations_file_name = "locations.csv"
-    locations_file_path = csv_storage_dir + '/' + locations_file_name
+    # locations_file_name = "locations.csv"
+    # locations_file_path = csv_storage_dir + '/' + locations_file_name
 
     # get list of locations column headers
-    locations_column_headers = list(locations_columnar_data.keys())
+    # locations_column_headers = list(locations_columnar_data.keys())
+    # print("locations_column_headers", locations_column_headers)
 
     # Write Locations to CSV
-    with open(locations_file_path, 'w') as locations_outfile:
+    '''with open(locations_file_path, 'w') as locations_outfile:
         csvwriter = csv.DictWriter(locations_outfile, fieldnames=locations_column_headers)
-        csvwriter.writerows(locations_records)
+        csvwriter.writerows(locations_records)'''
 
     # EXTRACT RUNS
     # fetch Runs data from Plants tab
@@ -136,27 +140,33 @@ def main():
     plants_column_ranges = build_gsheets_ranges("Plants", plants_start_row, plants_columns)
 
     # extract from Plants sheet
-    plants_results = sheet.values().batchGet(spreadsheetId=spreadsheet_id, ranges=plants_column_ranges,
+    run_results = sheet.values().batchGet(spreadsheetId=spreadsheet_id, ranges=plants_column_ranges,
                                              majorDimension='COLUMNS').execute()
-    plants_result_ranges = plants_results.get("valueRanges", [])
+    run_result_ranges = run_results.get("valueRanges", [])
 
-    plants_columnar_data = map_raw_data_to_columns(plants_result_ranges,
+    run_columnar_data = map_raw_data_to_columns(run_result_ranges,
                                                    is_column_header_included=plants_is_column_name_included)
 
-    plants_records = map_columnar_data_to_records(plants_columnar_data)
-    active_runs_records = [record for record in plants_records if record["Archive?"] == '']
+    run_records = map_columnar_data_to_records(run_columnar_data)
+    # handle this filtering in the load step
+    # active_runs_records = [record for record in run_records if record["Archive?"] == '']
 
     # define path for storing runs csv file from extract
-    runs_file_name = "runs.csv"
-    runs_file_path = csv_storage_dir + '/' + runs_file_name
+    # runs_file_name = "runs.csv"
+    # runs_file_path = csv_storage_dir + '/' + runs_file_name
 
     # get list of runs column headers
-    runs_column_headers = list(plants_columnar_data.keys())
+    # runs_column_headers = list(run_columnar_data.keys())
+    # print("runs_column_headers", runs_column_headers)
 
     # Write Runs to CSV
-    with open(runs_file_path, 'w') as runs_outfile:
+    '''with open(runs_file_path, 'w') as runs_outfile:
         csvwriter = csv.DictWriter(runs_outfile, fieldnames=runs_column_headers)
-        csvwriter.writerows(active_runs_records)
+        csvwriter.writerows(run_records)'''
+
+    # Add filter on requested location dims and runs
+
+    return {"Inventory": inventory_records, "Location": locations_records, "Run": run_records}
 
 
 if __name__ == "__main__":
