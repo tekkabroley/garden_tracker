@@ -15,11 +15,13 @@ import json
 from gsheets_extraction_tools import build_gsheets_ranges, map_raw_data_to_columns, map_columnar_data_to_records
 
 
-# If modifying these scopes, delete the file token.json.
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+
 
 
 def main():
+    # If modifying these scopes, delete the file token.json.
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+
     # CSV STORAGE PARAMETERS
     # today = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
     #  csv_storage_dir = f"csv/{today}"
@@ -50,7 +52,7 @@ def main():
     sheet = service.spreadsheets()
 
     # get sheet column parameters
-    sheet_parameters_path = "google_sheets_config.json"
+    sheet_parameters_path = "./extract/google_sheets_config.json"
     with open(sheet_parameters_path, 'r') as column_params:
         sheet_parameters = json.load(column_params)
 
