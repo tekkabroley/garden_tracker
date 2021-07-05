@@ -1,7 +1,8 @@
 from extract.job import main as run_extract
 from load.job import main as run_load
 from cli import main as run_cli
-from transform.apply_filters import main as run_filters
+from transform.filter.apply_inventory_filters import main as apply_inventory_filters
+from transform.filter.apply_run_filters import main as apply_run_filters
 
 
 
@@ -15,9 +16,12 @@ def main():
 
     print("----- building data objects from raw data -----")
     data_objs = run_load(**raw_data)
+    locations = data_objs["Location"]
 
     print("----- applying filters -----")
-    filtered_objs = run_filters(target_location, target_date, **data_objs)
+    location = locations[target_location]
+    inventory = apply_inventory_filters(location.sun_constraint, target_date, data_objs["Inventory"])
+    runs = apply_run_filters(location.name, data_objs["Run"])
 
     print("----- completed -----")
 

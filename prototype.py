@@ -39,7 +39,7 @@ def main():
     """
 
     # input for target date
-    target_location_ = input(user_location_prompt).strip()
+    target_location_ = input(user_location_prompt).strip().lower()
     if re.match('^[0-9]{1}', target_location_) is not None:
         location_code = target_location_[0]
         if location_code == '1':
@@ -125,7 +125,7 @@ def main():
     inventory_records_all = map_columnar_data_to_records(inventory_columnar_data)
     inventory_records = [record for record in inventory_records_all if record.get("Archived", '') == '']
     #print(f"returned {len(inventory_records)} records from Inventory")  # DEBUG
-    #print(f"Inventory columns: {inventory_records[0].keys()}")  # DEBUGå
+    print(f"Inventory columns: {inventory_records[0].keys()}")  # DEBUGå
 
     # specific inventory dims sliced by plant name
     inventory_attribute_map = {}
@@ -173,7 +173,7 @@ def main():
     # map locations columnar data to records
     locations_records = map_columnar_data_to_records(locations_columnar_data)[:-1]  # temp workaround for data cleaning
     #print(f"returned {len(locations_records)} records from Locations")  # DEBUG
-    #print(f"Locations columns: {locations_records[0].keys()}")  # DEBUG
+    print(f"Locations columns: {locations_records[0].keys()}")  # DEBUG
 
     # specific location dims sliced by plant name
     location_attribute_map = {}
@@ -215,7 +215,7 @@ def main():
     plants_records = map_columnar_data_to_records(plants_columnar_data)
     active_runs_records = [record for record in plants_records if record["Archive?"] == '']
     #print(f"returned {len(active_runs_records)} records from Plants")  # DEBUG
-    #print(f"Runs columns: {active_runs_records[0].keys()}")  # DEBUG
+    print(f"Runs columns: {active_runs_records[0].keys()}")  # DEBUG
 
 
     # FILTER INVENTORY ON LOCATION SUN CONSTRAINT
