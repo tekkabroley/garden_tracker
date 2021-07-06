@@ -26,7 +26,7 @@ def main():
     inventory = apply_inventory_filters(location.sun_constraint, target_date, inventory_all)
     runs = apply_run_filters(location.name, data_objs["Run"])
 
-    print("\n----- calculating recommendations -----")
+    print("\n----- calculating recommendations -----\n")
     location_available_area_map = location_available_area(target_date, inventory_all, location, runs)
     recommendations = inventory_recommendations(target_date, location_available_area_map, inventory)
 
