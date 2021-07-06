@@ -1,8 +1,5 @@
 from pydantic import BaseModel
 
-'''
-Runs columns: dict_keys(['Marketing Name', 'OD Location', 'Current Qty', 'Sown RPT', 'Harvest End RPT', 'Archive?'])
-'''
 
 class Run(BaseModel):
     location_name: str

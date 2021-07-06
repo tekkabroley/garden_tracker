@@ -5,28 +5,29 @@ from .models.Location import Location
 from .models.Run import Run
 
 
+# Add logging for execptions
+
 def inventory_handler(record):
-    name = record["Marketing Name"].strip()
+    name = record["Marketing Name"].strip().lower()
     try:
         spacing = float(record["Plant Spacing"])
     except ValueError:
-        spacing = None
+        return
 
     try:
         single_planting_max = int(record["Max Single Planting"])
     except ValueError:
-        # if no single_planting_max found then use 0
-        single_planting_max = 0
+        single_planting_max = None
 
     try:
         dtm = int(record["DTM"])
     except ValueError:
-        dtm = None
+        return
 
     try:
         md = int(record["MD"])
     except ValueError:
-        md = None
+        return
 
     # build set of months which are in season for inventory item
     month_abbreviations = {"mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "jan", "feb"}
@@ -52,8 +53,7 @@ def location_handler(record):
     try:
         total_area = float(record.get("Aval Area", 0))
     except ValueError:
-        # if no total_area found then use 0
-        total_area = 0
+        return
 
     return Location(
         name=name,
@@ -69,10 +69,8 @@ def run_handler(record):
     try:
         inventory_planted_cnt = int(record.get("Current Qty", 0))
     except ValueError:
-        inventory_planted_cnt = 0
+        return
 
-    #start_date = datetime.datetime.strptime(record["Sown RPT"].strip(), "%Y-%m-%d")
-    #end_date = datetime.datetime.strptime(record["Harvest End RPT"].strip(), "%Y-%m-%d")
     start_date = record["Sown RPT"].strip()
     end_date = record["Harvest End RPT"].strip()
     is_active = record.get("Archive?", "") == ""

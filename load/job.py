@@ -8,6 +8,8 @@ def main(**raw_data_records):
     inventory_records = raw_data_records["Inventory"]
     for record in inventory_records:
         inventory_obj = inventory_handler(record)
+        if inventory_obj is None:
+            continue
         inventory_name = inventory_obj.name
         inventory[inventory_name] = inventory_obj
 
@@ -15,11 +17,18 @@ def main(**raw_data_records):
     locations_records = raw_data_records["Location"]
     for record in locations_records:
         location_obj = location_handler(record)
+        if location_obj is None:
+            continue
         location_name = location_obj.name
         locations[location_name] = location_obj
 
+    runs = []
     run_records = raw_data_records["Run"]
-    runs = list(map(lambda rec: run_handler(rec), run_records))
+    for record in run_records:
+        run_obj = run_handler(record)
+        if run_obj is None:
+            continue
+        runs.append(run_obj)
 
     return {"Inventory": inventory, "Location": locations, "Run": runs}
 

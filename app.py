@@ -3,6 +3,8 @@ from load.job import main as run_load
 from cli import main as run_cli
 from transform.filter.apply_inventory_filters import main as apply_inventory_filters
 from transform.filter.apply_run_filters import main as apply_run_filters
+from transform.calcs import location_available_area, inventory_recommendations
+from view import print_recommendations
 
 
 
@@ -14,17 +16,23 @@ def main():
     print("----- extracting data from google sheets -----")
     raw_data = run_extract()
 
-    print("----- building data objects from raw data -----")
+    print("\n----- building data objects from raw data -----")
     data_objs = run_load(**raw_data)
     locations = data_objs["Location"]
+    inventory_all = data_objs["Inventory"]
 
-    print("----- applying filters -----")
+    print("\n----- applying filters -----")
     location = locations[target_location]
-    inventory = apply_inventory_filters(location.sun_constraint, target_date, data_objs["Inventory"])
+    inventory = apply_inventory_filters(location.sun_constraint, target_date, inventory_all)
     runs = apply_run_filters(location.name, data_objs["Run"])
 
-    print("----- completed -----")
+    print("\n----- calculating recommendations -----")
+    location_available_area_map = location_available_area(target_date, inventory_all, location, runs)
+    recommendations = inventory_recommendations(target_date, location_available_area_map, inventory)
 
+    print_recommendations(target_location, target_date, recommendations)
+
+    print("\n----- completed -----")
 
 
 if __name__ == "__main__":
