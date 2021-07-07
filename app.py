@@ -20,11 +20,12 @@ def main():
     data_objs = run_load(**raw_data)
     locations = data_objs["Location"]
     inventory_all = data_objs["Inventory"]
+    runs_all = data_objs["Run"]
 
     print("\n----- applying filters -----")
     location = locations[target_location]
     inventory = apply_inventory_filters(location.sun_constraint, target_date, inventory_all)
-    runs = apply_run_filters(location.name, data_objs["Run"])
+    runs = apply_run_filters(location.name, runs_all)
 
     print("\n----- calculating recommendations -----\n")
     location_available_area_map = location_available_area(target_date, inventory_all, location, runs)
