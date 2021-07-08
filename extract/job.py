@@ -12,10 +12,7 @@ import json
 # from pathlib import Path
 # import csv
 
-from gsheets_extraction_tools import build_gsheets_ranges, map_raw_data_to_columns, map_columnar_data_to_records
-
-
-
+from extract.gsheets_extraction_tools import build_gsheets_ranges, map_raw_data_to_columns, map_columnar_data_to_records
 
 
 def main():
