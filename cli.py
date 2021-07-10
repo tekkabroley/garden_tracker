@@ -5,45 +5,44 @@ from datetime import datetime
 def get_target_location():
     # input for target location
     user_location_prompt = """
-            1. Around Greenhouse
-            2. Back Bed Left
-            3. Back Bed Right
-            4. Front Bed Right
-            5. Ground Level Bed
-            6. Trellis Beds
-            7. West Bed Middle
-            8. West Bed North
-            9. West Bed South
+    1. Around Greenhouse
+    2. Back Bed Left
+    3. Back Bed Right
+    4. Front Bed Right
+    5. Ground Level Bed
+    6. Trellis Beds
+    7. West Bed Middle
+    8. West Bed North
+    9. West Bed South
 
-            Please enter the number or name of target location:
-        """
+    Please enter the number or name of target location: """
     # input for target location
     target_location = None
     target_location_ = input(user_location_prompt).strip().lower()
     if re.match('^[0-9]{1}', target_location_) is not None:
         location_code = target_location_[0]
         if location_code == '1':
-            target_location = "Around Greenhouse"
+            target_location = "around greenhouse"
         elif location_code == '2':
-            target_location = "Back Bed Left"
+            target_location = "back bed left"
         elif location_code == '3':
-            target_location = "Back Bed Right"
+            target_location = "back bed right"
         elif location_code == '4':
-            target_location = "Front Bed Right"
+            target_location = "front bed right"
         elif location_code == '5':
-            target_location = "Ground Level Bed"
+            target_location = "ground level bed"
         elif location_code == '6':
-            target_location = "Trellis Beds"
+            target_location = "trellis beds"
         elif location_code == '7':
-            target_location = "West Bed Middle"
+            target_location = "west bed middle"
         elif location_code == '8':
-            target_location = "West Bed North"
+            target_location = "west bed north"
         elif location_code == '9':
-            target_location = "West Bed South"
+            target_location = "west bed south"
     else:
         target_location = target_location_
 
-    return target_location.strip().lower()
+    return target_location
 
 
 def get_target_date():
