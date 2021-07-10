@@ -13,7 +13,7 @@ def location_available_area(target_date, inventory, location, runs):
                 planted_cnt = run.inventory_planted_cnt
                 plant_name = run.inventory_name
                 plant = inventory[plant_name]
-                used_area = plant.required_area() * planted_cnt  # method needs to be implemented
+                used_area = plant.required_area() * planted_cnt
                 available_area -= used_area
         available_area_by_date[date_] = available_area
         date_ = date_add_days(date_, 1)
