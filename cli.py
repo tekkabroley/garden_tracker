@@ -45,6 +45,22 @@ def get_target_location():
     return target_location
 
 
+def validate_location(location):
+    """ validate that location is one of the expected values for a location"""
+    locations = {
+        "around greenhouse",
+        "back bed left",
+        "back bed right",
+        "front bed right",
+        "ground level bed",
+        "trellis beds",
+        "west bed middle",
+        "west bed north",
+        "west bed south"
+    }
+    return location in locations
+
+
 def get_target_date():
     # input for target date
     user_date_prompt = "Please specify target date in format YYYY-mm-dd or press ENTER to use today's date: "
@@ -54,10 +70,27 @@ def get_target_date():
     return target_date
 
 
+def validate_date(date):
+    """ validate that date conforms to YYYY-mm-dd """
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+
 def main():
     # USER PROMPT
     target_location = get_target_location()
     target_date = get_target_date()
+
+    if not validate_location(target_location):
+        print(f"{target_location} is an invalid location.")
+        return main()
+
+    if not validate_date(target_date):
+        print(f"{target_date} is an invalid date. date needs to in format YYYY-mm-dd.")
+        return main()
 
     return {"target_location": target_location, "target_date": target_date}
 
