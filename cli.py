@@ -19,7 +19,9 @@ def get_target_location():
     # input for target location
     target_location = None
     target_location_ = input(user_location_prompt).strip().lower()
-    if re.match('^[0-9]{1}', target_location_) is not None:
+
+    # hard coded pattern creates dependency on there being fewer than 10 locations
+    if re.match('^[0-9]{1}$', target_location_) is not None:
         location_code = target_location_[0]
         if location_code == '1':
             target_location = "around greenhouse"
