@@ -12,7 +12,7 @@ def main(**raw_data_records):
     for record in inventory_records:
         inventory_obj = inventory_handler(record, logger)
         if inventory_obj is None:
-            logger(f"caught invalid Inventory record: {record}")
+            logger(f"caught invalid Inventory record: {record} | {inventory_obj}")
             continue
         inventory_name = inventory_obj.name
         inventory[inventory_name] = inventory_obj
@@ -22,7 +22,7 @@ def main(**raw_data_records):
     for record in locations_records:
         location_obj = location_handler(record, logger)
         if location_obj is None:
-            logger(f"caught invalid Location record: {record}")
+            logger(f"caught invalid Location record: {record} | {location_obj}")
             continue
         location_name = location_obj.name
         locations[location_name] = location_obj
@@ -32,7 +32,7 @@ def main(**raw_data_records):
     for record in run_records:
         run_obj = run_handler(record, logger)
         if run_obj is None:
-            logger(f"caught invalid Run record: {record}")
+            logger(f"caught invalid Run record: {record} | {run_obj}")
             continue
         runs.append(run_obj)
 
